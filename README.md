@@ -1,0 +1,1 @@
+## A Backtesting environment for Mean Reversion Strategies
