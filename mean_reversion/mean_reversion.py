@@ -1,5 +1,5 @@
 import numpy as np 
-from metrics import Metrics
+from .metrics import Metrics
 
 class MeanReversion:
     
