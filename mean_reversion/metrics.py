@@ -28,6 +28,8 @@ class Metrics:
 
         
     def show_data(self):
+        print()
+        print("===== SIMULATION RESULTS =====")
         print(f"Returns: {self.net_returns_percent:.2f}%")
         print(f"Deposit: ${self.cash}")
         print(f"Final Equity: ${self.final_equity:.2f}")
@@ -36,4 +38,6 @@ class Metrics:
         print(f"Average Annual Returns: {self.annual_mean:.2f}%")
         print(f"Daily Sharpe: {self.sharpe_daily:.2f}")
         print(f"Annualized Sharpe: {self.sharpe_annual:.2f}")
+        print("==========")
+        print()
 
