@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt 
 
 class Plots:
 
@@ -5,7 +6,7 @@ class Plots:
         self.data = data 
 
     def plot_spread_signal(self):
-        pass 
+        pass
 
     def plot_equity_curve(self):
         pass 

@@ -1,5 +1,6 @@
 import numpy as np 
 from .metrics import Metrics
+from statsmodels.tsa.stattools import adfuller
 
 class MeanReversion:
     
@@ -48,6 +49,23 @@ class MeanReversion:
         data.loc[data['signal'] == -1, 'strategy_returns'] = 0 
         
         return data
+
+    def stationarity_test(self, data, target):
+        
+        adf = adfuller(data[target], maxlag=1)
+        test_statistic, p_value, _, _, critical_value, _ = adf 
+        print(f"ADF Result Parameters: \n{adf}\n")
+        print(f"Test Statistic: {test_statistic:.4f}")
+        print(f"Critical Value: {critical_value['5%']:.4f}")
+        print(f"P-Value: {p_value:.4e}")
+
+        stationary = p_value < 0.05 
+
+        if stationary:
+            print(f"Series is stationary. (p-value {p_value*100:.4f}%)")
+        else:
+            print(f"Series is NOT stationary. (p-value {p_value*100:.4f}%)")
+
 
     
    
