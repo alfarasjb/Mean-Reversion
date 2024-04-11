@@ -138,8 +138,29 @@ class MeanReversionBacktest:
         sim.metrics.show_data()
 
     def plot(self, sim:mean_reversion.MeanReversion):
-        pass 
-
+        print()
+        print("===== PLOT FIGURES =====")
+        plots = mean_reversion.Plots(sim.built_model)
+        plot_options = {
+            'Spread' : plots.plot_spread_signal,
+            'Equity Curve' : plots.plot_equity_curve,
+            'Heatmap' : plots.plot_heatmap, 
+            'Annual Returns' : plots.plot_annual_returns 
+        }
+        self.sim = sim 
+        self.generate_options(plot_options.keys())
+        try:
+            plot = int(input("Select Option: "))
+            if plot == 0:
+                return None 
+            keys = list(plot_options.keys())
+            plot_options[keys[plot-1]]()
+            self.plot(sim=sim)
+            
+        except ValueError:
+            print(f"Invalid input. Use index to select option.")
+            self.plot(sim=sim)
+        print()
     def evaluate(self, sim):
         print()
         print("===== EVALUATE =====")

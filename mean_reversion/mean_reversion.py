@@ -111,17 +111,21 @@ class MeanReversion:
             spread_sigma = data['spread'].ewm(span=self.hyperparameters.spread_sdev_period).std()
         
         else: 
-            data['mean'] = data['close'].rolling(span=self.hyperparameters.mean_period).mean()
+            data['mean'] = data['close'].rolling(self.hyperparameters.mean_period).mean()
             data['spread'] = data['close'] - data['mean']
 
             spread_mu = data['spread'].rolling(self.hyperparameters.spread_mean_period).mean()
             spread_sigma = data['spread'].rolling(self.hyperparameters.spread_sdev_period).std()
 
-        # z-score = (x - mu) / sigma 
-        data['z_score'] = (data['spread'] - spread_mu) / spread_sigma
+
         
         lower_threshold = -self.hyperparameters.threshold 
         upper_threshold = self.hyperparameters.threshold
+        # z-score = (x - mu) / sigma 
+        data['z_score'] = (data['spread'] - spread_mu) / spread_sigma
+        data['z_upper'] = upper_threshold 
+        data['z_lower'] = lower_threshold
+        
         long_entry = (data['z_score'] < lower_threshold)
         long_exit = data['z_score'] >= 0
 
@@ -149,6 +153,11 @@ class MeanReversion:
             data.loc[data['signal'] == 1, 'strategy_returns'] = 0 
         else:
             pass 
+
+        data['returns'] = data['strategy_returns'].cumsum()
+        data['equity'] = (data['returns'] * self.cash) + self.cash 
+        data['peak'] = data['equity'].cummax()
+        data['drawdown'] = (data['equity'] - data['peak']) / data['peak'] * 100 
         
         return data
 
