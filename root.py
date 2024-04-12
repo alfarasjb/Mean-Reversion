@@ -2,6 +2,7 @@ import warnings
 warnings.filterwarnings('ignore')
 import mean_reversion 
 import os 
+import pandas as pd 
 
 
 
@@ -135,7 +136,7 @@ class MeanReversionBacktest:
     # ----------------------------- main methods ----------------------------- #
 
     
-    def select_dataset(self) -> str: 
+    def select_dataset(self) -> pd.DataFrame: 
 
         dl = mean_reversion.DataLoader()
         print("Select File...")
@@ -199,7 +200,7 @@ class MeanReversionBacktest:
     
     # ----------------------------- backtesting params ----------------------------- #
 
-    def hyperparameters(self):
+    def hyperparameters(self) -> mean_reversion.Hyperparameters:
         
         mean_period = self.get_mean_period()
         spread_mean_period = self.get_spread_mean_period()
@@ -219,7 +220,7 @@ class MeanReversionBacktest:
         
         return hparam
     
-    def accounts(self):
+    def accounts(self) -> mean_reversion.Accounts:
 
         cash = self.get_cash()
         accts = mean_reversion.Accounts(cash=cash)
