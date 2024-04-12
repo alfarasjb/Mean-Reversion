@@ -15,8 +15,8 @@ File requires the ff. columns: Open, High, Low, Close
 Store CSV files in the data folder. 
 ```
 
+![console_1](https://github.com/alfarasjb/Mean-Reversion/assets/72119101/e58a4b0b-5c77-45b2-a06f-feb0f0e16037)
 
-![image](assets\console_1.png)
 
 ```
 II. Configure Simulation Parameters
@@ -29,21 +29,24 @@ Side: Filters signals by side. Long only, short only, neutral
 Calculation: Exponential or Simple
 ```
 
-![image](assets\console_2.png)
+![console_2](https://github.com/alfarasjb/Mean-Reversion/assets/72119101/e2347515-3ea1-417e-9c1e-1792a404f3ac)
+
 
 
 ```
 III. Augmented Dickey-Fuller Test (Stationarity)
 ```
 
-![image](assets\console_3.png)
+![console_3](https://github.com/alfarasjb/Mean-Reversion/assets/72119101/c3bbdeb2-2ab8-4f35-b7ce-4748b52ba28b)
+
 
 
 ```
 IV. Backtest Results 
 ```
 
-![image](assets\console_4.png)
+![console_4](https://github.com/alfarasjb/Mean-Reversion/assets/72119101/02a9c459-8f48-4568-aad4-b98ecdef8aba)
+
 
 
 ```
@@ -55,20 +58,24 @@ Heatmap
 Annual Returns
 ```
 
-![image](assets\signal.png)
+![signal](https://github.com/alfarasjb/Mean-Reversion/assets/72119101/0adb6538-a893-47f4-b39b-f8bff193b533)
+
 *Plot of the close-mean spread vs Z-Score*
 
 ---
 
-![image](assets\equity_curve.png)
+![equity_curve](https://github.com/alfarasjb/Mean-Reversion/assets/72119101/69d6c318-ad2b-48b2-8d86-720f30b55831)
+
 *BDO Equity Curve* 
 
 ---
-![image](assets\heatmap.png)
+![heatmap](https://github.com/alfarasjb/Mean-Reversion/assets/72119101/d3d605a5-6243-4ee0-84c8-ba1b0c2fe1c9)
+
 *Heatmap of returns for BDO* 
 
 ---
-![image](assets\annual_returns.png)
+![annual_returns](https://github.com/alfarasjb/Mean-Reversion/assets/72119101/9d587657-1d60-4181-a6dc-416b0fb96ba8)
+
 *Annual Returns*
 
 ---
