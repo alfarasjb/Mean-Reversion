@@ -1,3 +1,7 @@
 notebook/
 mean_reversion/__pycache__/
 assets/
+__pycache__/ 
+.pytest_cache
+tests/__pycache__/
+tests/.pytest_cache/

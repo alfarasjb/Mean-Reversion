@@ -28,6 +28,17 @@ class Side:
 
         self.valid_values = [self.side_long, self.side_short, self.side_neutral]
 
+
+class Defaults:
+    def __init__(self):
+        self.mean_period = 20 
+        self.spread_mean_period = 10 
+        self.spread_sdev_period = 10 
+        self.threshold = 1 
+        self.side = Side().side_long 
+        self.calc_type = RollingCalculationType().calculation_exponential 
+        self.cash = 1000000
+
 class Hyperparameters:
     def __init__(self, 
                  mean_period:int, 
@@ -37,12 +48,14 @@ class Hyperparameters:
                  side:str,
                  calc_type:str):
         
-        self.mean_period = mean_period if mean_period is not None else 20# 20
-        self.spread_mean_period = spread_mean_period if spread_mean_period is not None else 10 # 10
-        self.spread_sdev_period = spread_sdev_period if spread_sdev_period is not None else 10# 10 
-        self.threshold = abs(threshold) if threshold is not None else 1# 1
-        self.side = side if side is not None else Side().side_long#long 
-        self.calc_type = calc_type if calc_type is not None else RollingCalculationType().calculation_exponential#exponential 
+        defaults = Defaults()
+
+        self.mean_period = mean_period if mean_period is not None else defaults.mean_period
+        self.spread_mean_period = spread_mean_period if spread_mean_period is not None else defaults.spread_mean_period
+        self.spread_sdev_period = spread_sdev_period if spread_sdev_period is not None else defaults.spread_sdev_period
+        self.threshold = abs(threshold) if threshold is not None else defaults.threshold
+        self.side = side if side is not None else defaults.side
+        self.calc_type = calc_type if calc_type is not None else defaults.calc_type
 
     def validate(self, mean_period, spread_mean_period, spread_sdev_period, side, calc_type): 
         if not self.valid_period(mean_period):
@@ -82,12 +95,16 @@ class Hyperparameters:
         print(f"Side: {self.side}")
         print(f"Calculation Type: {self.calc_type}")
         
+class Accounts:
+    def __init__(self, cash):
+        self.cash = cash if cash is not None else Defaults().cash
 
 class MeanReversion:
     
-    def __init__ (self, data, hyperparemeters:Hyperparameters, cash=1000000):
+    def __init__ (self, data, hyperparemeters:Hyperparameters, accounts:Accounts):
         self.hyperparameters = hyperparemeters
-        self.cash = cash 
+        self.cash = accounts.cash
+
 
         print(f"Simulation Created. Columns: {len(data.columns)}, Rows: {len(data)}, Cash: ${self.cash}")
         self.hyperparameters.print_values()
@@ -106,6 +123,7 @@ class MeanReversion:
         if self.hyperparameters.calc_type == self.tpl_calc.calculation_exponential:
             data['mean'] = data['close'].ewm(span=self.hyperparameters.mean_period).mean()
             data['spread'] = data['close'] - data['mean']
+
             
             spread_mu = data['spread'].ewm(span=self.hyperparameters.spread_mean_period).mean()
             spread_sigma = data['spread'].ewm(span=self.hyperparameters.spread_sdev_period).std()
@@ -113,6 +131,7 @@ class MeanReversion:
         else: 
             data['mean'] = data['close'].rolling(self.hyperparameters.mean_period).mean()
             data['spread'] = data['close'] - data['mean']
+
 
             spread_mu = data['spread'].rolling(self.hyperparameters.spread_mean_period).mean()
             spread_sigma = data['spread'].rolling(self.hyperparameters.spread_sdev_period).std()
