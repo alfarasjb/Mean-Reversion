@@ -6,6 +6,7 @@ import os
 
 
 class MeanReversionBacktest: 
+
     def __init__(self):
         self.file = None 
         self.cash_amount = None 
@@ -14,17 +15,17 @@ class MeanReversionBacktest:
         self.defaults = mean_reversion.Defaults()
 
     # ----------------------------- generic ----------------------------- #
-
-    @staticmethod 
-    def use_defaults(value:str):
-        if len(value.strip()) == 0:
+    
+    @staticmethod
+    def is_blank(value:str) -> bool: 
+        if len(value.strip()) == 0: 
             return True 
         if value.isspace():
             return True 
         return False 
 
     @staticmethod
-    def validate_integer_input(value:str, min_value:int=None):   
+    def validate_integer_input(value:str, min_value:int=None) -> bool:   
         
         # Returns true if input string is empty 
         if len(value) == 0:
@@ -71,7 +72,7 @@ class MeanReversionBacktest:
             
 
     @staticmethod 
-    def prompt(source:str, default:int, min_value:int= None):
+    def prompt(source:str, default:int, min_value:int= None) -> str:
         if min_value is None:
             return f"\n{source} [{default}]: "
      
@@ -86,47 +87,79 @@ class MeanReversionBacktest:
                 if not valid:
                     self.error_msg(source, inp_val)
                     continue 
-                if self.use_defaults(inp_val):
+                if self.is_blank(inp_val):
                     print(f"Using default for {source}: {default}")
                     return default 
                 return int(inp_val)
             except AssertionError as e:
                 print(f"Error. {e}")
+         
     
-    
+    def get_string_value(self, source:str, default: int, valid_values:list=None, show_exit:bool=False, use_str_input:bool=False) -> str:
+        print()
+        self.generate_options(valid_values, show_exit=show_exit)
+                
+        while True: 
+            inp_val = input(self.prompt(source, default))
+            try: 
+                inp_val = int(inp_val)
+
+            except ValueError: 
+                # For string inputs 
+                if self.is_blank(inp_val):
+                    print(f"Using default for {source}: {default}")
+                    return default 
+                if not use_str_input:
+                    # For selecting files (string inputs not allowed)
+                    print(f"Invalid input. Use index to select file.")
+                    continue 
+                # if use str input 
+                inp_val_str = inp_val.strip().lower()
+                if inp_val_str not in valid_values:
+                    print(f"Invalid string input for {source}. Value: {inp_val_str}.")
+                    continue 
+                return inp_val_str     
+
+                
+            if inp_val == 0:
+                print(f"Invalid selected value. Try Again.")
+                return None 
+            
+            try:
+                return valid_values[inp_val-1]
+            except IndexError:
+                print(f"Invalid selected value. True Again.")
+                continue 
+
 
     # ----------------------------- main methods ----------------------------- #
 
-    def select_dataset(self):
+    
+    def select_dataset(self) -> str: 
+
         dl = mean_reversion.DataLoader()
-        print("Select File..")
-        ## generates options
-        files = dl.files()
+        print("Select File...")
+        files=dl.files()
         if len(files) == 0:
             print(f"No files detected in data folder. Add files before testing.")
-            print("Columns required: open, high, low, close")
-            return None
-        self.generate_options(files)
-        
-        file = input("File: ")
-        try:
-            file = int(file)
-        except ValueError:
-            # only accept index as input 
-            print(f"Invalid input. Use index to select file.")
-            return self.select_dataset()
-
-        if file == 0:
+            print("Colmuns required: open, high, low, close")
             return None 
         
-        try: 
-            self.file = files[file-1]
-            print(f"Selected File: {self.file}")
-            return dl.load_data(self.file)
-        except IndexError:
-            print("Invalid selected value. Try Again.")
-            return self.select_dataset()
-      
+        dataset_value = self.get_string_value(
+                source = "Files",
+                default = None, 
+                valid_values=files,
+                show_exit=True,
+                use_str_input=False
+            )
+
+        if dataset_value is None: 
+            return dataset_value 
+        
+        self.file = dataset_value 
+        print(f"Selected File: {self.file}")
+        return dl.load_data(self.file)
+
     
     def get_cash(self) -> int:
         return self.get_integer_value("Cash", self.defaults.cash)
@@ -143,65 +176,27 @@ class MeanReversionBacktest:
     def get_threshold(self) -> int: 
         return self.get_integer_value("Threshold", self.defaults.threshold)     
 
-    def get_calculation_type(self) -> str:
-        calc = mean_reversion.RollingCalculationType()
-        self.generate_options(calc.valid_values, show_exit = False) 
-        calc_type = input(f"Calculation Type [{self.defaults.calc_type}]: ")
 
-        # Validate String/Integer Input 
-        try:
-            # Raises value error if input cannot be casted to integer
-            calc_type = int(calc_type)
-        except ValueError:
-            # If input is string, either empty input, or calc type string
-            if self.use_defaults(calc_type):
-                return self.defaults.calc_type
-            calc_type_str = calc_type.strip().lower()
-            if calc_type_str in calc.valid_values:
-                # Test case: exponential/simple 
-                # If input is found in valid values, return that value. 
-                return calc_type_str 
-            print(f"Invalid String input for Calculation Type. Value: {calc_type_str}.")
-            return self.get_calculation_type()
-        
-        if calc_type == 0: 
-            
-            print(f"Invalid selected value. Try Again.")
-            return self.get_calculation_type() 
-        
-        try: 
-            return calc.valid_values[calc_type - 1]
-        except IndexError: 
-            # If selected index does not exist, try again 
-            print("Invalid selected value. Try Again.")
-            return self.get_calculation_type()
+    def get_calculation_type(self) -> str: 
 
-    def get_side(self) -> str:
-        s = mean_reversion.Side()
-        self.generate_options(s.valid_values, show_exit = False)
-        side = input(f"Side [{self.defaults.side}]: ")
+        return self.get_string_value(
+            source="Calculation Type",
+            default = self.defaults.calc_type,
+            valid_values = mean_reversion.RollingCalculationType().valid_values,
+            use_str_input = True 
+        )
+    
 
-        try:
-            side = int(side)
-        except ValueError:  
-            if self.use_defaults(side):
-                return self.defaults.side        
-            side_str = side.strip().lower()
-            if side_str in s.valid_values:
-                return side_str
-            print(f"Invalid string input for Side. Value: {side_str}.")
-            return self.get_side()
-        
-        if side == 0: 
-            print(f"Invalid selected value. Try Again.")
-            return self.get_side()
-        
-        try:
-            return s.valid_values[side-1]
-        except IndexError:
-            print(f"Invalid selected value. Try Again.")
-            return self.get_side()
+    def get_side(self) -> str: 
 
+        return self.get_string_value( 
+            source="Side",
+            default=self.defaults.side, 
+            valid_values=mean_reversion.Side().valid_values,
+            use_str_input=True 
+        )
+    
+    
     # ----------------------------- backtesting params ----------------------------- #
 
     def hyperparameters(self):
@@ -225,11 +220,9 @@ class MeanReversionBacktest:
         return hparam
     
     def accounts(self):
-        cash = self.get_cash()
 
-        accts = mean_reversion.Accounts(
-            cash=cash 
-        )
+        cash = self.get_cash()
+        accts = mean_reversion.Accounts(cash=cash)
         return accts
     
 
@@ -238,10 +231,13 @@ class MeanReversionBacktest:
     def adf(self, sim:mean_reversion.MeanReversion):
         sim.stationarity_test(data=sim.built_model, target='spread')
         
+
     def print_results(self, sim:mean_reversion.MeanReversion):
         sim.metrics.show_data()
 
+
     def plot(self, sim:mean_reversion.MeanReversion):
+
         print()
         print("===== PLOT FIGURES =====")
         plots = mean_reversion.Plots(sim.built_model)
@@ -251,12 +247,16 @@ class MeanReversionBacktest:
             'Heatmap' : plots.plot_heatmap, 
             'Annual Returns' : plots.plot_annual_returns 
         }
+
         self.sim = sim 
         self.generate_options(plot_options.keys())
+
         try:
             plot = int(input("Select Option: "))
+
             if plot == 0:
                 return None 
+            
             keys = list(plot_options.keys())
             plot_options[keys[plot-1]]()
             self.plot(sim=sim)
@@ -264,9 +264,12 @@ class MeanReversionBacktest:
         except ValueError:
             print(f"Invalid input. Use index to select option.")
             self.plot(sim=sim)
+
         print()
 
+
     def evaluate(self, sim):
+
         print()
         print("===== EVALUATE =====")
         sim_options = {
@@ -274,32 +277,43 @@ class MeanReversionBacktest:
             "Results" : backtest.print_results, 
             "View Plots" : backtest.plot, 
         }
+
         self.sim = sim 
         self.generate_options(sim_options.keys())
+
         try:
             evaluation = int(input("Select Option: "))
+
             if evaluation == 0:
                 return None 
+            
             keys = list(sim_options.keys())
             sim_options[keys[evaluation-1]](sim)
             self.evaluate(sim=sim)
+
         except ValueError:
             print(f"Invalid input. Use index to select option.")      
             self.evaluate(sim=sim)
+
         print()
             
 
 if __name__ == "__main__":
+
     backtest = MeanReversionBacktest()
+
     while True: 
+
         print("==========================")
         print("===== MEAN REVERSION =====")
         print("==========================")
         
         inp = input("Press any key to continue..")
+
         df = backtest.select_dataset()
         if df is None:
             continue 
+
         accounts = backtest.accounts() 
         hparam = backtest.hyperparameters()
 
