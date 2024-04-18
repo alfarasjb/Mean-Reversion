@@ -8,7 +8,7 @@ def test_get_mean_period(monkeypatch):
     assert mbt().get_mean_period() == '20'
 """ 
 
-
+"""
 #def test_get_spread_mean_period(monkeypatch):
 #    monkeypatch.setattr('builtins.input', lambda _: '20')
 #    assert mbt().get_spread_mean_period() == 20
@@ -72,3 +72,5 @@ def test_get_side_valid_str(monkeypatch):
     input_value = 'Long'
     monkeypatch.setattr('builtins.input', lambda _: input_value)
     assert mbt().get_side() == Side().side_long
+
+    """

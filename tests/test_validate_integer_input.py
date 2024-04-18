@@ -1,43 +1,28 @@
-import pytest 
-#from ..root import MeanReversionBacktest as mbt
-#import mock 
-from unittest import mock 
+
 from root import MeanReversionBacktest as mbt
 from mean_reversion import Defaults
+import unittest 
+from unittest.mock import patch 
 
-"""
-def test_get_mean_period(monkeypatch):
-    monkeypatch.setattr('builtins.input', lambda _: '20')
-    assert mbt().get_mean_period() == '20'
 
-def test_get_mean_period_assertion_error(monkeypatch):
-    with pytest.raises(AssertionError):
-        monkeypatch.setattr('builtins.input', lambda _: '-1')
-        mbt().get_mean_period()
-"""
+class TestMeanReversionBackest(unittest.TestCase):
+    
+    # errors 
+    def test_validate_integer_input(self):
+        
+        self.assertRaises(AssertionError, lambda: mbt().validate_integer_input('-1'))
+        self.assertRaises(AssertionError, lambda: mbt().validate_integer_input('0',0))
+        self.assertTrue(mbt().validate_integer_input(''))
+        self.assertTrue(mbt().validate_integer_input('   ')) 
+        self.assertFalse(mbt().validate_integer_input('some random string')) 
+        self.assertTrue(mbt().validate_integer_input('20',0))
+        #self.assertRaises(AssertionError, mbt().validate_integer_input, ['0', 0])
+        #self.assertTrue(mbt().validate_integer_input('')) 
 
-#def test_get_mean_period():
-#    assert int(mbt().get_mean_period(mean_period='20')) == 20
+    def test_is_blank(self):
+        self.assertTrue(mbt().is_blank('   '))
+        self.assertFalse(mbt().is_blank('12345'))
 
-#def test_get_mean_period_default(): 
-#    assert int(mbt().get_mean_period(mean_period='')) == Defaults().mean_period
-
-def test_validate_integer_input_negative_input():
-    with pytest.raises(AssertionError):
-        mbt().validate_integer_input('-1')
-
-def test_validate_integer_input_minimum_value():
-    with pytest.raises(AssertionError):
-        mbt().validate_integer_input('0',0)
-
-def test_validate_integer_input_empty_string():
-    assert mbt().validate_integer_input('') == True
-
-def test_validate_input_integer_white_spaces():
-    assert mbt().validate_integer_input('    ') == True
-
-def test_validate_integer_input_string():
-    assert mbt().validate_integer_input('some random string') == False
-
-def test_validate_integer_input_valid():
-    assert mbt().validate_integer_input('20',0) == True
+    @patch('builtins.input', return_value='')
+    def test_get_cash(self, mocked):
+        self.assertEqual(mbt().get_cash(), 1000000)
